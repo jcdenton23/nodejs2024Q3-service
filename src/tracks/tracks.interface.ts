@@ -1,25 +1,25 @@
-import { IsNotEmpty, IsOptional, IsString } from 'class-validator';
+import { IsNotEmpty, IsNumber, IsOptional, IsString } from 'class-validator';
 
 export interface Track {
   id: string;
-  title: string;
+  name: string;
   albumId: string | null;
   artistId: string | null;
-  duration: string;
+  duration: number;
 }
 
 export class CreateTrackDto {
   @IsString()
   @IsNotEmpty()
-  title: string;
+  name: string;
 
   @IsOptional()
   @IsNotEmpty()
   artistId: string | null;
 
-  @IsString()
+  @IsNumber()
   @IsNotEmpty()
-  duration: string;
+  duration: number;
 
   @IsOptional()
   @IsString()
@@ -30,7 +30,7 @@ export class UpdateTrackDto {
   @IsOptional()
   @IsString()
   @IsNotEmpty()
-  title?: string;
+  name?: string;
 
   @IsOptional()
   @IsString()
@@ -38,9 +38,9 @@ export class UpdateTrackDto {
   artistId?: string;
 
   @IsOptional()
-  @IsString()
+  @IsNumber()
   @IsNotEmpty()
-  duration?: string;
+  duration?: number;
 
   @IsOptional()
   @IsString()

@@ -21,7 +21,7 @@ export class TracksService {
   create(createTrackDto: CreateTrackDto): Track {
     const newTrack: Track = {
       id: uuid.v4(),
-      title: createTrackDto.title,
+      name: createTrackDto.name,
       artistId: createTrackDto.artistId ?? null,
       albumId: createTrackDto.albumId ?? null,
       duration: createTrackDto.duration,
@@ -48,7 +48,7 @@ export class TracksService {
 
   update(id: string, updateTrackDto: UpdateTrackDto): Track {
     const track = this.findOne(id);
-    if (updateTrackDto.title) track.title = updateTrackDto.title;
+    if (updateTrackDto.name) track.name = updateTrackDto.name;
     if (updateTrackDto.artistId) track.artistId = updateTrackDto.artistId;
     if (updateTrackDto.duration) track.duration = updateTrackDto.duration;
     if (updateTrackDto.albumId) track.albumId = updateTrackDto.albumId;

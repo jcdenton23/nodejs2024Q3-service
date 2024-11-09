@@ -11,6 +11,9 @@ import { AlbumsService } from '../albums/albums.service';
 import { ArtistsService } from '../artists/artists.service';
 import { TracksService } from '../tracks/tracks.service';
 import { isUUID } from 'class-validator';
+import { Artist } from 'src/artists/artists.interface';
+import { Album } from 'src/albums/albums.interface';
+import { Track } from 'src/tracks/tracks.interface';
 
 @Injectable()
 export class FavoritesService {
@@ -30,15 +33,20 @@ export class FavoritesService {
   ) {}
 
   getAllFavorites(): FavoritesResponse {
-    const artists = this.favorites.artists.map((id) =>
-      this.artistsService.findOne(id),
-    );
-    const albums = this.favorites.albums.map((id) =>
-      this.albumsService.findOne(id),
-    );
-    const tracks = this.favorites.tracks.map((id) =>
-      this.tracksService.findOne(id),
-    );
+    const artists =
+      this.favorites.artists
+        .map((id) => this.artistsService.getArtistById(id))
+        .filter((artist): artist is Artist => artist !== undefined) || [];
+
+    const albums =
+      this.favorites.albums
+        .map((id) => this.albumsService.getAlbumByid(id))
+        .filter((album): album is Album => album !== undefined) || [];
+
+    const tracks =
+      this.favorites.tracks
+        .map((id) => this.tracksService.getTrackById(id))
+        .filter((track): track is Track => track !== undefined) || [];
 
     return { artists, albums, tracks };
   }
