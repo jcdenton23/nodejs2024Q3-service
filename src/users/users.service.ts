@@ -4,10 +4,10 @@ import {
   ForbiddenException,
 } from '@nestjs/common';
 import { v4 as uuidv4 } from 'uuid';
-import { User, CreateUserDto, UpdatePasswordDto } from './user.interface';
+import { User, CreateUserDto, UpdatePasswordDto } from './users.interface';
 
 @Injectable()
-export class UserService {
+export class UsersService {
   private users: User[] = [];
 
   findAll(): Omit<User, 'password'>[] {
