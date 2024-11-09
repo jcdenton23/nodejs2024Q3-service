@@ -33,7 +33,6 @@ export class FavoritesService {
     const artists = this.favorites.artists.map((id) =>
       this.artistsService.findOne(id),
     );
-    console.log(artists);
     const albums = this.favorites.albums.map((id) =>
       this.albumsService.findOne(id),
     );
@@ -52,7 +51,7 @@ export class FavoritesService {
     let exists = false;
     switch (type) {
       case 'track':
-        exists = !!this.tracksService.findOne(id);
+        exists = !!this.tracksService.getTrackById(id);
         if (!exists)
           throw new UnprocessableEntityException(
             `Track with ID ${id} does not exist`,
@@ -60,7 +59,7 @@ export class FavoritesService {
         if (!this.favorites.tracks.includes(id)) this.favorites.tracks.push(id);
         break;
       case 'album':
-        exists = !!this.albumsService.findOne(id);
+        exists = !!this.albumsService.getAlbumByid(id);
         if (!exists)
           throw new UnprocessableEntityException(
             `Album with ID ${id} does not exist`,
@@ -68,7 +67,7 @@ export class FavoritesService {
         if (!this.favorites.albums.includes(id)) this.favorites.albums.push(id);
         break;
       case 'artist':
-        exists = !!this.artistsService.findOne(id);
+        exists = !!this.artistsService.getArtistById(id);
         if (!exists)
           throw new UnprocessableEntityException(
             `Artist with ID ${id} does not exist`,

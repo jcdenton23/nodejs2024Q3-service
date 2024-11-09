@@ -35,11 +35,15 @@ export class TracksService {
   }
 
   findOne(id: string): Track {
-    const track = this.tracks.find((track) => track.id === id);
+    const track = this.getTrackById(id);
     if (!track) {
       throw new NotFoundException(`Track with ID ${id} not found`);
     }
     return track;
+  }
+
+  getTrackById(id: string): Track {
+    return this.tracks.find((track) => track.id === id);
   }
 
   update(id: string, updateTrackDto: UpdateTrackDto): Track {

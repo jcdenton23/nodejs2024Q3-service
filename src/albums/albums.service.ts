@@ -36,11 +36,15 @@ export class AlbumsService {
   }
 
   findOne(id: string): Album {
-    const album = this.albums.find((album) => album.id === id);
+    const album = this.getAlbumByid(id);
     if (!album) {
       throw new NotFoundException(`Album with ID ${id} not found`);
     }
     return album;
+  }
+
+  getAlbumByid(id: string): Album {
+    return this.albums.find((album) => album.id === id);
   }
 
   update(id: string, updateAlbumDto: UpdateAlbumDto): Album {
