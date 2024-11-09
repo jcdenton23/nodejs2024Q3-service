@@ -1,5 +1,3 @@
-// src/artist/artist.controller.ts
-
 import {
   Body,
   Controller,
@@ -11,12 +9,12 @@ import {
   Post,
   Put,
 } from '@nestjs/common';
-import { ArtistService } from './artists.service';
+import { ArtistsService } from './artists.service';
 import { Artist, CreateArtistDto, UpdateArtistDto } from './artists.interface';
 
 @Controller('artist')
-export class ArtistController {
-  constructor(private readonly artistService: ArtistService) {}
+export class ArtistsController {
+  constructor(private readonly artistService: ArtistsService) {}
 
   @Post()
   create(@Body() createArtistDto: CreateArtistDto): Artist {

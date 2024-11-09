@@ -4,7 +4,7 @@ export interface Track {
   id: string;
   title: string;
   albumId: string | null;
-  artist: string | null;
+  artistId: string | null;
   duration: string;
 }
 
@@ -15,7 +15,7 @@ export class CreateTrackDto {
 
   @IsOptional()
   @IsNotEmpty()
-  artist: string | null;
+  artistId: string | null;
 
   @IsString()
   @IsNotEmpty()
@@ -35,7 +35,7 @@ export class UpdateTrackDto {
   @IsOptional()
   @IsString()
   @IsNotEmpty()
-  artist?: string;
+  artistId?: string;
 
   @IsOptional()
   @IsString()
