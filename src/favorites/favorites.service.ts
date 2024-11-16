@@ -1,114 +1,132 @@
-import {
-  Injectable,
-  NotFoundException,
-  BadRequestException,
-  UnprocessableEntityException,
-  Inject,
-  forwardRef,
-} from '@nestjs/common';
-import { Favorites, FavoritesResponse } from './favorites.interface';
-import { AlbumsService } from '../albums/albums.service';
-import { ArtistsService } from '../artists/artists.service';
-import { TracksService } from '../tracks/tracks.service';
-import { isUUID } from 'class-validator';
-import { Artist } from 'src/artists/artists.interface';
-import { Album } from 'src/albums/albums.interface';
-import { Track } from 'src/tracks/tracks.interface';
+import { Injectable } from '@nestjs/common';
+import { PrismaService } from 'src/prisma/prisma.service';
+import { FavoriteType } from './favorites.types';
 
 @Injectable()
 export class FavoritesService {
-  private favorites: Favorites = {
-    artists: [],
-    albums: [],
-    tracks: [],
-  };
+  constructor(private prismaService: PrismaService) {}
 
-  constructor(
-    @Inject(forwardRef(() => AlbumsService))
-    private readonly albumsService: AlbumsService,
-    @Inject(forwardRef(() => ArtistsService))
-    private readonly artistsService: ArtistsService,
-    @Inject(forwardRef(() => TracksService))
-    private readonly tracksService: TracksService,
-  ) {}
+  async getAllFavorites() {
+    const [tracks, artists, albums] = await Promise.all([
+      this.getFavorites('track'),
+      this.getFavorites('artist'),
+      this.getFavorites('album'),
+    ]);
 
-  getAllFavorites(): FavoritesResponse {
-    const artists =
-      this.favorites.artists
-        .map((id) => this.artistsService.getArtistById(id))
-        .filter((artist): artist is Artist => artist !== undefined) || [];
-
-    const albums =
-      this.favorites.albums
-        .map((id) => this.albumsService.getAlbumByid(id))
-        .filter((album): album is Album => album !== undefined) || [];
-
-    const tracks =
-      this.favorites.tracks
-        .map((id) => this.tracksService.getTrackById(id))
-        .filter((track): track is Track => track !== undefined) || [];
-
-    return { artists, albums, tracks };
+    return { tracks, artists, albums };
   }
 
-  addFavorite(type: 'track' | 'album' | 'artist', id: string): void {
-    if (!isUUID(id)) {
-      throw new BadRequestException(`Invalid UUID: ${id}`);
-    }
-
-    let exists = false;
-    switch (type) {
+  private async getFavorites(favoriteType: FavoriteType) {
+    switch (favoriteType) {
       case 'track':
-        exists = !!this.tracksService.getTrackById(id);
-        if (!exists)
-          throw new UnprocessableEntityException(
-            `Track with ID ${id} does not exist`,
-          );
-        if (!this.favorites.tracks.includes(id)) this.favorites.tracks.push(id);
-        break;
-      case 'album':
-        exists = !!this.albumsService.getAlbumByid(id);
-        if (!exists)
-          throw new UnprocessableEntityException(
-            `Album with ID ${id} does not exist`,
-          );
-        if (!this.favorites.albums.includes(id)) this.favorites.albums.push(id);
-        break;
+        return (
+          await this.prismaService.favoriteTrack.findMany({
+            include: { track: true },
+          })
+        ).map((v) => v.track);
+
       case 'artist':
-        exists = !!this.artistsService.getArtistById(id);
-        if (!exists)
-          throw new UnprocessableEntityException(
-            `Artist with ID ${id} does not exist`,
-          );
-        if (!this.favorites.artists.includes(id))
-          this.favorites.artists.push(id);
-        break;
+        return (
+          await this.prismaService.favoriteArtist.findMany({
+            include: { artist: true },
+          })
+        ).map((v) => v.artist);
+
+      case 'album':
+        return (
+          await this.prismaService.favoriteAlbum.findMany({
+            include: { album: true },
+          })
+        ).map((v) => v.album);
+
+      default:
+        return [];
     }
   }
 
-  removeFavorite(type: 'track' | 'album' | 'artist', id: string): void {
-    if (!isUUID(id)) {
-      throw new BadRequestException(`Invalid UUID: ${id}`);
-    }
-
-    const index = this.favorites[(type + 's') as keyof Favorites].indexOf(id);
-    if (index === -1) {
-      throw new NotFoundException(
-        `${
-          type.charAt(0).toUpperCase() + type.slice(1)
-        } with ID ${id} is not in favorites`,
-      );
-    }
-
-    this.favorites[(type + 's') as keyof Favorites].splice(index, 1);
+  async doesItemExist(id: string, favoriteType: FavoriteType) {
+    return Boolean(await this.findItemById(id, favoriteType));
   }
 
-  removeFromFavorite(
-    entityType: 'artist' | 'album' | 'track',
-    id: string,
-  ): void {
-    this.favorites[entityType] = this.favorites?.[entityType]?.filter(
-      (favId) => favId !== id,
-    );
+  private async findItemById(id: string, favoriteType: FavoriteType) {
+    switch (favoriteType) {
+      case 'artist':
+        return this.prismaService.artist.findUnique({ where: { id } });
+      case 'album':
+        return this.prismaService.album.findUnique({ where: { id } });
+      case 'track':
+        return this.prismaService.track.findUnique({ where: { id } });
+      default:
+        return null;
+    }
+  }
+
+  async isItemInFavorites(id: string, favoriteType: FavoriteType) {
+    switch (favoriteType) {
+      case 'artist':
+        return this.prismaService.favoriteArtist.findUnique({
+          where: { artistId: id },
+        });
+      case 'album':
+        return this.prismaService.favoriteAlbum.findUnique({
+          where: { albumId: id },
+        });
+      case 'track':
+        return this.prismaService.favoriteTrack.findUnique({
+          where: { trackId: id },
+        });
+      default:
+        return null;
+    }
+  }
+
+  async addFavorite(id: string, favoriteType: FavoriteType) {
+    const existingFavorite = await this.isItemInFavorites(id, favoriteType);
+    if (existingFavorite) return existingFavorite;
+
+    return this.addToFavorites(id, favoriteType);
+  }
+
+  private async addToFavorites(id: string, favoriteType: FavoriteType) {
+    switch (favoriteType) {
+      case 'artist':
+        return this.prismaService.favoriteArtist.create({
+          data: { artistId: id },
+        });
+      case 'album':
+        return this.prismaService.favoriteAlbum.create({
+          data: { albumId: id },
+        });
+      case 'track':
+        return this.prismaService.favoriteTrack.create({
+          data: { trackId: id },
+        });
+      default:
+        throw new Error(`Unsupported favorite type: ${favoriteType}`);
+    }
+  }
+
+  async removeFavorite(id: string, favoriteType: FavoriteType) {
+    const deleteMethod = this.getDeleteMethod(favoriteType);
+    if (!deleteMethod)
+      throw new Error(`Unsupported favorite type: ${favoriteType}`);
+
+    await deleteMethod(id);
+  }
+
+  private getDeleteMethod(favoriteType: FavoriteType) {
+    switch (favoriteType) {
+      case 'artist':
+        return (id: string) =>
+          this.prismaService.favoriteArtist.delete({ where: { artistId: id } });
+      case 'album':
+        return (id: string) =>
+          this.prismaService.favoriteAlbum.delete({ where: { albumId: id } });
+      case 'track':
+        return (id: string) =>
+          this.prismaService.favoriteTrack.delete({ where: { trackId: id } });
+      default:
+        return null;
+    }
   }
 }

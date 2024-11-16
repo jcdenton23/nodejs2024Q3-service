@@ -10,24 +10,25 @@ import {
   ParseUUIDPipe,
   HttpException,
   HttpStatus,
+  UseInterceptors,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
-import { CreateUserDto, UpdatePasswordDto } from './users.interface';
+import { CreateUserDto, UpdatePasswordDto } from './users.dto';
+import { PasswordInterceptor } from './password.interceptor';
 
 @Controller('user')
+@UseInterceptors(PasswordInterceptor)
 export class UsersController {
-  constructor(private readonly userService: UsersService) {}
+  constructor(private readonly usersService: UsersService) {}
 
   @Get()
-  findAll() {
-    return this.userService.findAll();
+  async findAll() {
+    return this.usersService.findAll();
   }
 
   @Get(':id')
-  async getUserById(
-    @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
-  ) {
-    const user = this.userService.findOne(id);
+  async getUserById(@Param('id', ParseUUIDPipe) id: string) {
+    const user = await this.usersService.findOne(id);
     if (!user) {
       throw new HttpException('User not found', HttpStatus.NOT_FOUND);
     }
@@ -35,21 +36,21 @@ export class UsersController {
   }
 
   @Post()
-  create(@Body() createUserDto: CreateUserDto) {
-    return this.userService.create(createUserDto);
+  async create(@Body() createUserDto: CreateUserDto) {
+    return this.usersService.create(createUserDto);
   }
 
   @Put(':id')
-  update(
-    @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
+  async updatePassword(
+    @Param('id', ParseUUIDPipe) id: string,
     @Body() updatePasswordDto: UpdatePasswordDto,
   ) {
-    return this.userService.updatePassword(id, updatePasswordDto);
+    return this.usersService.updatePassword(id, updatePasswordDto);
   }
 
   @Delete(':id')
-  @HttpCode(204)
-  remove(@Param('id', new ParseUUIDPipe({ version: '4' })) id: string) {
-    return this.userService.remove(id);
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async remove(@Param('id', ParseUUIDPipe) id: string) {
+    return this.usersService.remove(id);
   }
 }
