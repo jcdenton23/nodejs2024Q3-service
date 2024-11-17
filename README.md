@@ -70,13 +70,13 @@ npm run test
 
 Dev mode:
 ```
-  npm run docker:dev:scan
+npm run docker:dev:scan
 ```
 Don't forget to run the development containers before scanning.
 
 Hub mode:
 ```
-  npm run docker:hub:scan
+npm run docker:hub:scan
 ```
 
 
