@@ -17,19 +17,22 @@ export class PrismaExceptionInterceptor implements NestInterceptor {
   ): HttpException {
     const errorMap: Record<string, { message: string; status: HttpStatus }> = {
       P2002: {
-        message: 'Unique constraint violation',
+        message:
+          'A unique constraint has been violated. Ensure that the provided value is unique.',
         status: HttpStatus.CONFLICT,
       },
       P2003: {
-        message: 'Foreign key constraint violation',
+        message:
+          'Invalid foreign key reference. Check if the related resource exists.',
         status: HttpStatus.BAD_REQUEST,
       },
       P2004: {
-        message: 'A required field is missing or is NULL',
+        message:
+          'A required field is either missing or set to NULL. Please provide all mandatory fields.',
         status: HttpStatus.BAD_REQUEST,
       },
       P2025: {
-        message: 'Record to update not found',
+        message: 'The requested record for update or deletion does not exist.',
         status: HttpStatus.NOT_FOUND,
       },
     };
@@ -40,7 +43,7 @@ export class PrismaExceptionInterceptor implements NestInterceptor {
     }
 
     return new HttpException(
-      'Internal Server Error',
+      'An unexpected database error occurred. Please try again later.',
       HttpStatus.INTERNAL_SERVER_ERROR,
     );
   }
