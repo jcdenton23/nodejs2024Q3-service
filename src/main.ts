@@ -4,6 +4,7 @@ import { ValidationPipe } from '@nestjs/common';
 import * as dotenv from 'dotenv';
 import * as YAML from 'yamljs';
 import { SwaggerModule } from '@nestjs/swagger';
+import { PrismaExceptionInterceptor } from './interceptors/prima-exception.interceptor';
 
 dotenv.config();
 
@@ -19,6 +20,7 @@ async function bootstrap() {
 
   const yamlDoc = YAML.load('./doc/api.yaml');
   SwaggerModule.setup('doc', app, yamlDoc);
+  app.useGlobalInterceptors(new PrismaExceptionInterceptor());
   await app.listen(process.env.PORT);
 }
 bootstrap();
