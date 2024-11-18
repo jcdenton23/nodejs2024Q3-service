@@ -2,13 +2,21 @@
 
 ## Prerequisites
 
-- Git - [Download & Install Git](https://git-scm.com/downloads).
-- Node.js - [Download & Install Node.js](https://nodejs.org/en/download/) and the npm package manager.
+Ensure you have the following installed before proceeding:
 
+- [Git](https://git-scm.com/downloads): Version control system
+- [Node.js](https://nodejs.org/): Includes npm (Node.js Package Manager)
+- [Docker](https://www.docker.com/products/docker-desktop): Containerization platform
+  
 ## Downloading
 
 ```
-git clone {repository URL}
+git clone https://github.com/jcdenton23/nodejs2024Q3-service.git
+```
+Switch to the dev-2 branch
+
+```
+git checkout dev-2
 ```
 
 ## Installing NPM modules
@@ -19,9 +27,30 @@ npm install
 
 ## Running application
 
+Development mode:
+
+Start:
 ```
-npm start
+npm run docker:dev:up
 ```
+Stop and remove docker containers:
+```
+npm run docker:dev:down
+```
+
+Before switching between Develoopment and Hub modes, don't forget to stop and remove containers from the current mode.
+
+Hub mode:
+
+Start:
+```
+npm run docker:hub:up
+```
+Stop and remove docker containers:
+```
+npm run docker:hub:down
+```
+
 
 After starting the app on port (4000 as default) you can open
 in your browser OpenAPI documentation by typing http://localhost:4000/doc/.
@@ -31,42 +60,23 @@ For more information about OpenAPI/Swagger please visit https://swagger.io/.
 
 After application running open new terminal and enter:
 
-To run all tests without authorization
+To run all tests 
 
 ```
 npm run test
 ```
 
-To run only one of all test suites
+### Docker Vulnerability Scanning
 
+Dev mode:
 ```
-npm run test -- <path to suite>
+npm run docker:dev:scan
 ```
+Don't forget to run the development containers before scanning.
 
-To run all test with authorization
-
+Hub mode:
 ```
-npm run test:auth
-```
-
-To run only specific test suite with authorization
-
-```
-npm run test:auth -- <path to suite>
+npm run docker:hub:scan
 ```
 
-### Auto-fix and format
 
-```
-npm run lint
-```
-
-```
-npm run format
-```
-
-### Debugging in VSCode
-
-Press <kbd>F5</kbd> to debug.
-
-For more information, visit: https://code.visualstudio.com/docs/editor/debugging
