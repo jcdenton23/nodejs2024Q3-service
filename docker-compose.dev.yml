@@ -10,6 +10,7 @@ services:
       - '${POSTGRES_PORT}:5432'
     volumes:
       - postgres_data:/var/lib/postgresql/data
+      - postgres_logs:/var/lib/postgresql
     restart: always
     networks:
       - api_db_network
@@ -35,6 +36,7 @@ services:
 
 volumes:
   postgres_data:
+  postgres_logs:
 
 networks:
   api_db_network:
