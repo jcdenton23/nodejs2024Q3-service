@@ -4,6 +4,7 @@ services:
       context: .
       dockerfile: Dockerfile-db
     container_name: 'db-container'
+    platform: 'linux/amd64'
     env_file:
       - .env
     ports:
@@ -19,6 +20,7 @@ services:
       context: .
       dockerfile: Dockerfile-app
     container_name: 'api-container'
+    platform: 'linux/amd64'
     ports:
       - '$PORT:$PORT'
     tty: true
@@ -32,6 +34,7 @@ services:
       - .env
     volumes:
       - ./src:/app/src
+      - ./logs:/app/logs
 
 volumes:
   postgres_data:
