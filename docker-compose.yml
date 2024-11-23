@@ -2,7 +2,7 @@ services:
   db:
     image: fifaxjcd/db
     container_name: 'db-container'
-    platform: 'linux/amd64'
+    platform: 'linux/arm64/v8'
     env_file:
       - .env
     ports:
@@ -16,7 +16,7 @@ services:
   app:
     image: fifaxjcd/app
     container_name: 'api-container'
-    platform: 'linux/amd64'
+    platform: 'linux/arm64/v8'
     ports:
       - '$PORT:$PORT'
     tty: true
