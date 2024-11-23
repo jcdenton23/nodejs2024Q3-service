@@ -8,5 +8,6 @@ import { LoggingService } from 'src/logging/logging.service';
   controllers: [UsersController],
   providers: [UsersService, LoggingService],
   imports: [PrismaModule],
+  exports: [UsersService],
 })
 export class UsersModule {}

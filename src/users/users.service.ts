@@ -20,6 +20,10 @@ export class UsersService {
     return user;
   }
 
+  async findUserByLogin(login: string) {
+    return this.prisma.user.findUnique({ where: { login } });
+  }
+
   async create(createUserDto: CreateUserDto) {
     const user = await this.prisma.user.create({ data: createUserDto });
     return {

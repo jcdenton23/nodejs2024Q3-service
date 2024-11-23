@@ -7,6 +7,7 @@ import { SwaggerModule } from '@nestjs/swagger';
 import { PrismaExceptionInterceptor } from './interceptors/prima-exception.interceptor';
 import { LoggingService } from './logging/logging.service';
 import { CustomExceptionFilter } from './exceptionFilter/exceptionFilter.filter';
+import { AuthJwtGuard } from './auth/auth-jwt.guard';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -27,7 +28,7 @@ async function bootstrap() {
   const yamlDoc = YAML.load('./doc/api.yaml');
   SwaggerModule.setup('doc', app, yamlDoc);
   app.useGlobalInterceptors(new PrismaExceptionInterceptor());
-
+  app.useGlobalGuards(new AuthJwtGuard());
   app.useGlobalFilters(new CustomExceptionFilter(loggingService));
   const port = configService.get<number>('PORT', 4000);
   await app.listen(port);
