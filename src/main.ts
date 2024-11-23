@@ -9,30 +9,7 @@ import { LoggingService } from './logging/logging.service';
 import { CustomExceptionFilter } from './exceptionFilter/exceptionFilter.filter';
 import { AuthJwtGuard } from './auth/auth-jwt.guard';
 
-async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
-
-  const configService = app.get(ConfigService);
-  const loggingService = app.get(LoggingService);
-
-  app.useLogger(loggingService);
-
-  app.useGlobalPipes(
-    new ValidationPipe({
-      whitelist: true,
-      forbidNonWhitelisted: true,
-      transform: true,
-    }),
-  );
-
-  const yamlDoc = YAML.load('./doc/api.yaml');
-  SwaggerModule.setup('doc', app, yamlDoc);
-  app.useGlobalInterceptors(new PrismaExceptionInterceptor());
-  app.useGlobalGuards(new AuthJwtGuard());
-  app.useGlobalFilters(new CustomExceptionFilter(loggingService));
-  const port = configService.get<number>('PORT', 4000);
-  await app.listen(port);
-
+const setProcessEventListeners = (loggingService: LoggingService) => {
   process.on('uncaughtException', (error) => {
     loggingService.error(`Uncaught Exception: ${error.message}`, error.stack);
   });
@@ -42,6 +19,32 @@ async function bootstrap() {
       `Unhandled Rejection at: ${promise} reason: ${reason}`,
     );
   });
+};
+
+async function bootstrap() {
+  const app = await NestFactory.create(AppModule);
+
+  const configService = app.get(ConfigService);
+  const loggingService = app.get(LoggingService);
+
+  app.useLogger(loggingService);
+  app.useGlobalPipes(
+    new ValidationPipe({
+      whitelist: true,
+      forbidNonWhitelisted: true,
+      transform: true,
+    }),
+  );
+  app.useGlobalInterceptors(new PrismaExceptionInterceptor());
+  app.useGlobalGuards(new AuthJwtGuard());
+  app.useGlobalFilters(new CustomExceptionFilter(loggingService));
+
+  const yamlDoc = YAML.load('./doc/api.yaml');
+  SwaggerModule.setup('doc', app, yamlDoc);
+
+  const port = configService.get<number>('PORT', 4000);
+  await app.listen(port);
+  setProcessEventListeners(loggingService);
 }
 
 bootstrap();
