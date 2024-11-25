@@ -4,7 +4,6 @@ services:
       context: .
       dockerfile: Dockerfile-db
     container_name: 'db-container'
-    platform: 'linux/arm64/v8'
     env_file:
       - .env
     ports:
@@ -20,7 +19,6 @@ services:
       context: .
       dockerfile: Dockerfile-app
     container_name: 'api-container'
-    platform: 'linux/arm64/v8'
     ports:
       - '$PORT:$PORT'
     tty: true
